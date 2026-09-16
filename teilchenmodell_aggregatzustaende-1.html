@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aggregatzustände – Teilchenmodell</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6f8;
+    color: #222;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 18px 10px 8px;
+  }
+
+  #info {
+    font-size: 1rem;
+    margin: 0 10px 12px;
+    min-height: 24px;
+  }
+
+  canvas {
+    display: block;
+    width: min(94vw, 700px);
+    height: min(65vh, 500px);
+    margin: 0 auto;
+    background: white;
+    border: 2px solid #555;
+    border-radius: 10px;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 14px 10px;
+  }
+
+  button {
+    border: 1px solid #777;
+    border-radius: 8px;
+    background: white;
+    padding: 10px 14px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover, button.active {
+    background: #e1e7eb;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Aggregatzustände im Teilchenmodell</h1>
+<div id="info">
+  Feststoff: Die Teilchen liegen dicht beieinander und schwingen.
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="buttons">
+  <button id="solid" class="active">Feststoff</button>
+  <button id="liquid">Flüssigkeit</button>
+  <button id="gas">Gas</button>
+</div>
+
+<script>
+/*
+  TEILCHENMODELL
+  ---------------
+
+  Feststoff:
+  Die Teilchen bilden einen festen Block am BODEN.
+  Sie bleiben an ihrem Platz und schwingen nur.
+
+  Flüssigkeit:
+  Die Teilchen befinden sich am BODEN des Gefäßes.
+  Sie können ihre Plätze vertauschen und langsam
+  aneinander vorbeigleiten.
+
+  Gas:
+  Die Teilchen bewegen sich frei im gesamten Gefäß.
+*/
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const info = document.getElementById("info");
+
+let state = "solid";
+
+const NUMBER = 45;
+const RADIUS = 8;
+
+let particles = [];
+
+
+/* --------------------------------------------------
+   TEILCHEN ERZEUGEN
+-------------------------------------------------- */
+
+for (let i = 0; i < NUMBER; i++) {
+  particles.push({
+    x: 0,
+    y: 0,
+
+    // Geschwindigkeit
+    vx: 0,
+    vy: 0,
+
+    // Für die Schwingung im Feststoff
+    phase: Math.random() * Math.PI * 2
+  });
+}
+
+
+/* --------------------------------------------------
+   CANVAS AN BILDSCHIRM ANPASSEN
+-------------------------------------------------- */
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+
+/* --------------------------------------------------
+   FESTSTOFF
+   ----------------
+   Der Teilchenblock steht auf dem Boden.
+   Er sieht dadurch ungefähr wie ein Eiswürfel aus.
+-------------------------------------------------- */
+
+function makeSolid() {
+
+  const columns = 9;
+  const rows = 5;
+
+  particles.forEach((p, i) => {
+
+    const col = i % columns;
+    const row = Math.floor(i / columns);
+
+    // Block unten im Gefäß
+    p.x = 0.20 + col * 0.075;
+
+    // Unterste Reihe liegt nahe am Boden.
+    // Die weiteren Reihen liegen darüber.
+    p.y = 0.91 - row * 0.10;
+
+    p.vx = 0;
+    p.vy = 0;
+  });
+}
+
+
+/* --------------------------------------------------
+   FLÜSSIGKEIT
+   ----------------
+   Die Teilchen werden über den gesamten unteren
+   Bereich verteilt.
+
+   Sie bewegen sich langsam und können ihre Plätze
+   verändern. Dadurch entsteht der Eindruck von
+   Wasser, ohne dass die Teilchen nach oben fliegen.
+-------------------------------------------------- */
+
+function makeLiquid() {
+
+  particles.forEach(p => {
+
+    // Gleichmäßig über den unteren Bereich verteilen
+    p.x = 0.07 + Math.random() * 0.86;
+
+    // Wasserfüllstand: von etwa 35 % bis zum Boden
+    p.y = 0.05 + Math.random() * 0.56;
+
+    // Langsame zufällige Bewegung
+    p.vx = (Math.random() - 0.5) * 0.0014;
+    p.vy = (Math.random() - 0.5) * 0.0010;
+  });
+}
+
+
+/* --------------------------------------------------
+   GAS
+-------------------------------------------------- */
+
+function makeGas() {
+
+  particles.forEach(p => {
+
+    p.x = 0.05 + Math.random() * 0.90;
+    p.y = 0.05 + Math.random() * 0.90;
+
+    p.vx = (Math.random() - 0.5) * 0.0018;
+    p.vy = (Math.random() - 0.5) * 0.0018;
+  });
+}
+
+
+/* --------------------------------------------------
+   ZUSTAND WECHSELN
+-------------------------------------------------- */
+
+function setState(newState) {
+
+  state = newState;
+
+  if (state === "solid") {
+    info.textContent =
+      "Feststoff: Die Teilchen liegen dicht beieinander und schwingen.";
+    makeSolid();
+  }
+
+  if (state === "liquid") {
+    info.textContent =
+      "Flüssigkeit: Die Teilchen sind unten verteilt und können ihre Plätze vertauschen.";
+    makeLiquid();
+  }
+
+  if (state === "gas") {
+    info.textContent =
+      "Gas: Die Teilchen bewegen sich frei im gesamten Raum.";
+    makeGas();
+  }
+
+  document.querySelectorAll("button").forEach(button => {
+    button.classList.remove("active");
+  });
+
+  document.getElementById(state).classList.add("active");
+}
+
+
+/* --------------------------------------------------
+   ANIMATION
+-------------------------------------------------- */
+
+function animate(time) {
+
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, width, height);
+
+
+  particles.forEach(p => {
+
+
+    /* ----------------------------------------------
+       FESTSTOFF
+       ----------------------------------------------
+       Nur kleine Schwingungen um den festen Platz.
+    */
+
+    if (state === "solid") {
+
+      const vibration = 0.006;
+
+      const ox =
+        Math.sin(time * 0.006 + p.phase) * vibration;
+
+      const oy =
+        Math.cos(time * 0.007 + p.phase) * vibration;
+
+      drawParticle(
+        (p.x + ox) * width,
+        (p.y + oy) * height
+      );
+    }
+
+
+    /* ----------------------------------------------
+       FLÜSSIGKEIT
+       ----------------------------------------------
+       Die Teilchen bewegen sich langsam.
+       Wichtig:
+       Sie bleiben im unteren Bereich.
+
+       Zusätzlich wird eine kleine "Vertauschbewegung"
+       eingebaut: Die Teilchen ändern ständig ihre
+       Richtung und können dadurch aneinander vorbei-
+       gleiten.
+    */
+
+    if (state === "liquid") {
+
+      // Kleine Richtungsänderungen
+      if (Math.random() < 0.025) {
+        p.vx += (Math.random() - 0.5) * 0.00035;
+        p.vy += (Math.random() - 0.5) * 0.00030;
+      }
+
+      // Geschwindigkeit begrenzen
+      p.vx = Math.max(-0.0018, Math.min(0.0018, p.vx));
+      p.vy = Math.max(-0.0013, Math.min(0.0013, p.vy));
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+
+      // Seitliche Wände
+      if (p.x < 0.025) {
+        p.x = 0.025;
+        p.vx *= -1;
+      }
+
+      if (p.x > 0.975) {
+        p.x = 0.975;
+        p.vx *= -1;
+      }
+
+
+      // Obergrenze der Flüssigkeit
+      if (p.y < 0.31) {
+        p.y = 0.31;
+        p.vy *= -1;
+      }
+
+
+      // Boden
+      if (p.y > 0.96) {
+        p.y = 0.96;
+        p.vy *= -1;
+      }
+
+      drawParticle(p.x * width, p.y * height);
+    }
+
+
+    /* ----------------------------------------------
+       GAS
+    */
+
+    if (state === "gas") {
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0.04 || p.x > 0.96) {
+        p.vx *= -1;
+      }
+
+      if (p.y < 0.04 || p.y > 0.96) {
+        p.vy *= -1;
+      }
+
+      drawParticle(p.x * width, p.y * height);
+    }
+
+  });
+
+  requestAnimationFrame(animate);
+}
+
+
+/* --------------------------------------------------
+   TEILCHEN ZEICHNEN
+-------------------------------------------------- */
+
+function drawParticle(x, y) {
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x,
+    y,
+    RADIUS,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle = "#4b83b5";
+  ctx.fill();
+
+  ctx.strokeStyle = "#24516f";
+  ctx.stroke();
+}
+
+
+/* --------------------------------------------------
+   START
+-------------------------------------------------- */
+
+makeSolid();
+
+requestAnimationFrame(animate);
+
+
+/* --------------------------------------------------
+   BUTTONS
+-------------------------------------------------- */
+
+document.getElementById("solid").onclick =
+  () => setState("solid");
+
+document.getElementById("liquid").onclick =
+  () => setState("liquid");
+
+document.getElementById("gas").onclick =
+  () => setState("gas");
+
+</script>
+
+</body>
+</html>

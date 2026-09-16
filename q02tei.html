@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggregatzustände Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --box-bg-color: #2c2c2e;
+            --correct-bg-color: #1c3b1e;
+            --correct-border: #2e6b32;
+            --correct-text-color: #b6d7a8;
+            --incorrect-bg-color: #4a151b;
+            --incorrect-border: #8b2500;
+            --incorrect-text-color: #f4cccc;
+            --btn-blue: #0d6efd;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* Progress Bar */
+        .progress-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #0d6efd;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Question */
+        .question-text {
+            font-size: 18px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-box {
+            background-color: var(--box-bg-color);
+            padding: 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .option-label {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .explanation {
+            display: none;
+            font-size: 14px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        /* States */
+        .option-box.selected-correct {
+            background-color: var(--correct-bg-color);
+            border-color: var(--correct-border);
+        }
+        .option-box.selected-correct .option-label { color: var(--correct-text-color); }
+        .option-box.selected-correct .explanation { display: block; color: var(--correct-text-color); }
+
+        .option-box.selected-incorrect {
+            background-color: var(--incorrect-bg-color);
+            border-color: var(--incorrect-border);
+        }
+        .option-box.selected-incorrect .option-label { color: var(--incorrect-text-color); }
+        .option-box.selected-incorrect .explanation { display: block; color: var(--incorrect-text-color); }
+
+        /* Hint Section */
+        .hint-section {
+            margin-top: 5px;
+        }
+
+        .hint-toggle {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .hint-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: none; /* Standardmäßig ausgeblendet */
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-secondary {
+            background-color: var(--box-bg-color);
+            color: var(--text-color);
+        }
+
+        .btn-primary {
+            background-color: var(--btn-blue);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">Teilchenmodell – Wahr oder Falsch?</div>
+
+    <div class="progress-header">
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">1 / 10</span>
+    </div>
+
+    <div class="question-text" id="question-text"></div>
+
+    <div class="options-container" id="options-container"></div>
+
+    <!-- Hinweis-Bereich -->
+    <div class="hint-section">
+        <div class="hint-toggle" onclick="toggleHint()">
+            <span>Hinweis anzeigen</span>
+            <span id="hint-arrow">▼</span>
+        </div>
+        <div class="hint-text" id="hint-text"></div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">Zurück</button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Weiter</button>
+    </div>
+</div>
+
+<script>
+
+const questions = [
+    {
+        num: 1,
+        text: "1. Nach dem Teilchenmodell besteht alle Materie aus winzig kleinen Bausteinen.",
+        hint: "Denke an Klemmbausteine (wie Lego), aus denen ganze Häuser gebaut werden.",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Das Teilchenmodell besagt, dass alles in unserer Welt aus unzählig vielen kleinen Teilchen besteht." },
+            { label: "B. Falsch", explanation: "Falsch. Alles um uns herum – egal ob fest, flüssig oder gasförmig – besteht aus winzigen Teilchen." }
+        ]
+    },
+    {
+        num: 2,
+        text: "2. In einem Festkörper sind die Teilchen in einer festen Ordnung angeordnet.",
+        hint: "Stell dir Schüler vor, die in einer Reihe auf ihren Stühlen sitzen.",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Festkörper haben ein festes Gitter, in dem jedes Teilchen seinen festen Platz hat." },
+            { label: "B. Falsch", explanation: "Falsch. In Festkörpern sind die Teilchen geordnet gebunden und können ihren Platz nicht einfach verlassen." }
+        ]
+    },
+    {
+        num: 3,
+        text: "3. Wenn man Tinte in ein Glas Wasser tropft, verteilt sie sich von selbst. Das liegt an der Teilchenbewegung.",
+        hint: "Das Fachwort für diese selbstständige Vermischung heißt Diffusion.",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Weil sich die Wasser- und Tintenteilchen ständig bewegen und aneinander stoßen, vermischen sie sich." },
+            { label: "B. Falsch", explanation: "Falsch. Die ständige Eigenbewegung der Teilchen sorgt dafür, dass sich die Tinte von ganz allein verteilt." }
+        ]
+    },
+    {
+        num: 4,
+        text: "4. Die Teilchen in einem Gas ziehen sich sehr stark gegenseitig an.",
+        hint: "Können Gase sich deshalb frei im ganzen Raum ausbreiten?",
+        correctIndex: 1,
+        options: [
+            { label: "A. Richtig", explanation: "Falsch. In Gasen sind die Anziehungskräfte zwischen den Teilchen extrem schwach – deshalb fliegen sie frei herum." },
+            { label: "B. Falsch", explanation: "Richtig! Gasteilchen ziehen sich kaum an. Erst dadurch können sie sich rasch im Raum verteilen." }
+        ]
+    },
+    {
+        num: 5,
+        text: "5. Wenn man einen Stoff erwärmt, werden seine einzelnen Teilchen selbst größer.",
+        hint: "Werden die Teilchen selbst dicker oder brauchen sie nur mehr Platz, weil sie wilder wackeln?",
+        correctIndex: 1,
+        options: [
+            { label: "A. Richtig", explanation: "Falsch. Die Teilchen selbst bleiben immer gleich groß! Sie bewegen sich nur schneller und stoßen sich weiter auseinander." },
+            { label: "B. Falsch", explanation: "Richtig! Die Teilchen verändern ihre eigene Größe nie. Der Abstand zwischen ihnen wird nur größer." }
+        ]
+    },
+    {
+        num: 6,
+        text: "6. In einer Flüssigkeit berühren sich die Teilchen fast gar nicht.",
+        hint: "Berühren sich flüssige Teilchen oder haben sie nur Abstände wie im Gas?",
+        correctIndex: 1,
+        options: [
+            { label: "A. Richtig", explanation: "Falsch. In Flüssigkeiten berühren sich die Teilchen dicht, können aber aneinander vorbeigleiten." },
+            { label: "B. Falsch", explanation: "Richtig! Auch in Flüssigkeiten liegen die Teilchen dicht beieinander – anders als bei Gasen." }
+        ]
+    },
+    {
+        num: 7,
+        text: "7. Der Geruch von gebratenem Essen verteilt sich in warmen Räumen schneller als in kalten Räumen.",
+        hint: "Bewegen sich Teilchen bei höheren Temperaturen schneller oder langsamer?",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Höhere Temperatur bedeutet schnellere Teilchen, wodurch sich Düfte rascher ausbreiten." },
+            { label: "B. Falsch", explanation: "Falsch. Da Wärme die Teilchen beschleunigt, verteilt sich der Geruch in warmer Luft tatsächlich schneller." }
+        ]
+    },
+    {
+        num: 8,
+        text: "8. Alle Teilchen desselben Reinstoffs (z. B. reinstes Wasser) sind exakt gleich groß und schwer.",
+        hint: "Unterscheiden sich Wasser-Teilchen untereinander?",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Bei einem reinen Stoff sind alle Teilchen absolut identisch in Form, Masse und Größe." },
+            { label: "B. Falsch", explanation: "Falsch. Ein Reinstoff besteht immer aus genau einer Sorte völlig gleicher Teilchen." }
+        ]
+    },
+    {
+        num: 9,
+        text: "9. Schwere Teilchen bewegen sich bei gleicher Temperatur schneller als leichte Teilchen.",
+        hint: "Wer braucht bei gleicher Anschubenergie mehr Kraft zum Flitzen: ein LKW oder ein Fahrrad?",
+        correctIndex: 1,
+        options: [
+            { label: "A. Richtig", explanation: "Falsch. Schwerere Teilchen sind bei gleicher Energie träger und bewegen sich langsamer als leichte." },
+            { label: "B. Falsch", explanation: "Richtig! Bei derselben Temperatur sind leichtere Teilchen flinker unterwegs als schwere Teilchen." }
+        ]
+    },
+    {
+        num: 10,
+        text: "10. Das Teilchenmodell kann erklären, warum sich Stoffe auflösen (z. B. Zucker im Tee).",
+        hint: "Schieben sich die Zucker-Teilchen zwischen die Wasser-Teilchen?",
+        correctIndex: 0,
+        options: [
+            { label: "A. Richtig", explanation: "Richtig! Die Zucker-Teilchen lösen sich vom Kristall und verteilen sich in den Lücken zwischen den Wasser-Teilchen." },
+            { label: "B. Falsch", explanation: "Falsch. Genau das ist eine Hauptaufgabe des Teilchenmodells: Es erklärt das Auflösen und Mischen von Stoffen." }
+        ]
+    }
+];
+
+
+    let currentIndex = 0; // Startet bei Frage 1 (Index 0)
+    let isHintVisible = false; // Hinweis startet ausgeblendet
+
+    function renderQuestion() {
+        const q = questions[currentIndex];
+        
+        // Header & Fortschritt
+        document.getElementById("progress-text").textContent = `${q.num} / ${questions.length}`;
+        document.getElementById("progress-bar-fill").style.width = `${(q.num / questions.length) * 100}%`;
+        document.getElementById("question-text").textContent = q.text;
+        document.getElementById("hint-text").textContent = q.hint;
+
+        // Zustand des Hinweises anpassen
+        applyHintVisibility();
+
+        // Antwortoptionen aufbauen
+        const container = document.getElementById("options-container");
+        container.innerHTML = "";
+
+        q.options.forEach((opt, idx) => {
+            const box = document.createElement("div");
+            box.className = "option-box";
+            box.onclick = () => selectOption(box, idx === q.correctIndex);
+
+            box.innerHTML = `
+                <div class="option-label">${opt.label}</div>
+                <div class="explanation">${opt.explanation}</div>
+            `;
+            container.appendChild(box);
+        });
+
+        // Nav-Buttons Status
+        document.getElementById("btn-prev").disabled = currentIndex === 0;
+        document.getElementById("btn-next").disabled = currentIndex === questions.length - 1;
+    }
+
+    function selectOption(element, isCorrect) {
+        const allBoxes = document.querySelectorAll('.option-box');
+        allBoxes.forEach(box => box.className = 'option-box');
+
+        if (isCorrect) {
+            element.classList.add('selected-correct');
+        } else {
+            element.classList.add('selected-incorrect');
+        }
+    }
+
+    function toggleHint() {
+        isHintVisible = !isHintVisible;
+        applyHintVisibility();
+    }
+
+    function applyHintVisibility() {
+        const hintText = document.getElementById("hint-text");
+        const hintToggleText = document.querySelector(".hint-toggle span:first-child");
+        const hintArrow = document.getElementById("hint-arrow");
+
+        if (isHintVisible) {
+            hintText.style.display = "block";
+            hintToggleText.textContent = "Hinweis ausblenden";
+            hintArrow.textContent = "▲";
+        } else {
+            hintText.style.display = "none";
+            hintToggleText.textContent = "Hinweis anzeigen";
+            hintArrow.textContent = "▼";
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentIndex < questions.length - 1) {
+            currentIndex++;
+            renderQuestion();
+        }
+    }
+
+    // Initiales Rendern beim Laden der Seite
+    renderQuestion();
+</script>
+
+</body>
+</html>
