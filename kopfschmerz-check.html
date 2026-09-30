@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kopfschmerz-Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eaf1ee;--card:#fff;--ink:#14302a;--mute:#556b65;--line:#c9d9d4;--acc:#1d6b58;--acc-ink:#fff;--sel:#d8ece5;--red-bg:#fde8e6;--red:#8a1d14;--amb-bg:#fff2d6;--amb:#6b4700;--grn-bg:#dcf0e6;--grn:#14503f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c19;--card:#182a26;--ink:#e6f1ee;--mute:#9db5ae;--line:#2c443e;--acc:#5fc4a8;--acc-ink:#0b1f1a;--sel:#21453b;--red-bg:#3d1b18;--red:#ffb4ab;--amb-bg:#3a2f12;--amb:#f5d78a;--grn-bg:#173a2e;--grn:#9be0c6}}
+:root[data-theme="dark"]{--bg:#0f1c19;--card:#182a26;--ink:#e6f1ee;--mute:#9db5ae;--line:#2c443e;--acc:#5fc4a8;--acc-ink:#0b1f1a;--sel:#21453b;--red-bg:#3d1b18;--red:#ffb4ab;--amb-bg:#3a2f12;--amb:#f5d78a;--grn-bg:#173a2e;--grn:#9be0c6}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:18px/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:28px;line-height:1.2;margin:8px 0 12px}
+h2{font-size:23px;line-height:1.25;margin:20px 0 6px}
+p{margin:0 0 12px}
+.mute{color:var(--mute);font-size:16px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:4px 0 4px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.opts{display:grid;gap:10px;margin:16px 0}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;min-height:58px;cursor:pointer}
+.opt .box{flex:none;width:24px;height:24px;border:2px solid var(--mute);border-radius:50%}
+.multi .opt .box{border-radius:6px}
+.opt[aria-pressed="true"]{border-color:var(--acc);background:var(--sel)}
+.opt[aria-pressed="true"] .box{background:var(--acc);border-color:var(--acc);box-shadow:inset 0 0 0 4px var(--sel)}
+.multi .opt[aria-pressed="true"] .box{box-shadow:none}
+.btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px 20px;min-height:54px;cursor:pointer;background:var(--acc);color:var(--acc-ink);width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.nav{display:flex;gap:10px;margin-top:8px}
+.nav .btn.ghost{width:auto;flex:none}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.hint{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;margin:14px 0}
+.res{border-radius:16px;padding:18px;margin:12px 0}
+.res.red{background:var(--red-bg);color:var(--red)}.res.amb{background:var(--amb-bg);color:var(--amb)}.res.grn{background:var(--grn-bg);color:var(--grn)}
+.res h1{margin:0 0 8px;font-size:24px}
+ul{margin:6px 0 12px;padding-left:22px}li{margin:4px 0}
+pre{white-space:pre-wrap;word-break:break-word;font:15px/1.5 inherit;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 12px;user-select:all}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var Q=[
+{k:"Dauer",t:"Seit wann bestehen die Kopfschmerzen?",o:["1–2 Tage","3–5 Tage","6–14 Tage","Länger als 2 Wochen"]},
+{k:"Ort",t:"Wo genau sitzt der Schmerz?",o:["Mitte der Stirn","Stirn, beidseitig","Stirn und hinter den Augen","Stirn, Wangen und Nasenwurzel (Druckgefühl)","Einseitig an Stirn oder Schläfe"]},
+{k:"Art",t:"Wie fühlt sich der Schmerz an?",o:["Dumpf, drückend","Wie ein Band oder Reifen um den Kopf","Pochend, pulsierend","Stechend","Brennend"]},
+{k:"Stärke",t:"Wie stark ist der Schmerz?",o:["Leicht – Alltag gut möglich","Mittel – stört, Alltag aber möglich","Stark – Alltag kaum möglich","Sehr stark – schlimmster Schmerz, den es je gab"]},
+{k:"Verlauf",t:"Wie verläuft der Schmerz?",o:["Dauerhaft ähnlich","Kommt und geht in Schüben","Morgens am schlimmsten","Nimmt im Tagesverlauf zu","Wird insgesamt schlimmer"]},
+{k:"Begleitend",t:"Was tritt zusätzlich auf?",m:1,o:["Übelkeit oder Erbrechen","Lichtempfindlichkeit","Geräuschempfindlichkeit","Verstopfte oder laufende Nase","Schmerz stärker beim Vornüberbeugen","Fieber","Brennende oder tränende Augen","Nichts davon|x"]},
+{k:"Warnzeichen",t:"Trifft eines dieser Warnzeichen zu?",m:1,w:1,o:["Schlagartig einsetzender, extrem heftiger Schmerz","Steifer Nacken (Kinn lässt sich nicht zur Brust neigen)","Sehstörungen oder Doppelbilder","Lähmung, Taubheit oder Sprachstörung","Verwirrtheit, ungewöhnliche Schläfrigkeit oder Ohnmacht","Krampfanfall","Fieber mit Hautausschlag","Nichts davon|x"]},
+{k:"Umstände",t:"Was trifft aktuell zu?",m:1,o:["Wenig geschlafen","Viel Bildschirmarbeit","Viel Stress","Wenig getrunken","Erkältung oder Nasennebenhöhlen-Infekt","Kopfverletzung oder Sturz in den letzten Wochen","Nichts davon / unklar|x"]},
+{k:"Schmerzmittel",t:"Wurden Schmerzmittel genommen?",o:["Bisher nichts genommen","Ja, hilft gut","Ja, hilft kaum","An mehr als 10 Tagen im Monat Schmerzmittel"]},
+{k:"Früher",t:"Gab es solche Kopfschmerzen schon einmal?",o:["Nie zuvor","Gelegentlich ähnliche","Migräne ist bekannt"]}
+];
+var A={},i=-1,app=document.getElementById("app");
+function lab(s){return s.split("|")[0]}
+function sel(q){return A[q]||[]}
+function render(){
+ if(i<0){app.innerHTML='<h1>Kopfschmerz-Check</h1><p>Zehn kurze Fragen zu den Kopfschmerzen. Alles per Antippen, nichts muss getippt werden. Dauer: etwa zwei Minuten.</p><div class="hint">Das ist keine Diagnose und ersetzt keine ärztliche Beratung. Die Antworten bleiben auf diesem Gerät und werden nirgends gespeichert.</div><button class="btn" id="go">Los geht’s</button>';
+  document.getElementById("go").onclick=function(){i=0;render()};return}
+ if(i>=Q.length){return result()}
+ var q=Q[i],cur=sel(i),h='<div class="mute">Frage '+(i+1)+' von '+Q.length+'</div><div class="bar"><i style="width:'+(i/Q.length*100)+'%"></i></div><h2>'+q.t+'</h2>';
+ if(q.m)h+='<div class="mute">Mehrere Antworten möglich.</div>';
+ h+='<div class="opts'+(q.m?' multi':'')+'">';
+ q.o.forEach(function(o,n){h+='<button class="opt" data-n="'+n+'" aria-pressed="'+(cur.indexOf(n)>-1)+'"><span class="box"></span><span>'+lab(o)+'</span></button>'});
+ h+='</div><div class="nav"><button class="btn ghost" id="back">Zurück</button>'+(q.m?'<button class="btn" id="next"'+(cur.length?'':' disabled')+'>Weiter</button>':'')+'</div>';
+ app.innerHTML=h;
+ document.getElementById("back").onclick=function(){i--;render()};
+ var nx=document.getElementById("next");if(nx)nx.onclick=function(){i++;render()};
+ app.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){
+  var n=+b.dataset.n;
+  if(!q.m){A[i]=[n];setTimeout(function(){i++;render()},180);b.setAttribute("aria-pressed","true");return}
+  var c=sel(i).slice(),ex=q.o[n].indexOf("|x")>-1,k=c.indexOf(n);
+  if(k>-1)c.splice(k,1);else{
+   if(ex)c=[n];else c=c.filter(function(x){return q.o[x].indexOf("|x")<0}).concat(n)}
+  A[i]=c;render()}});
+ window.scrollTo(0,0);
+}
+function has(q,n){return sel(q).indexOf(n)>-1}
+function result(){
+ var red=[],doc=[],tips=[],hint=[];
+ sel(6).forEach(function(n){if(Q[6].o[n].indexOf("|x")<0)red.push(lab(Q[6].o[n]))});
+ if(has(0,2)||has(0,3))doc.push("Die Kopfschmerzen bestehen seit mehr als 5 Tagen.");
+ if(has(3,2)||has(3,3))doc.push("Der Schmerz ist stark bis sehr stark.");
+ if(has(4,4))doc.push("Der Schmerz wird insgesamt schlimmer.");
+ if(has(5,5))doc.push("Es besteht Fieber.");
+ if(has(7,5))doc.push("Es gab eine Kopfverletzung oder einen Sturz.");
+ if(has(8,3))doc.push("Schmerzmittel werden an mehr als 10 Tagen im Monat genommen (kann selbst Kopfschmerzen auslösen).");
+ if(has(9,0)&&!has(0,0))doc.push("Solche Kopfschmerzen gab es nie zuvor und sie halten schon einige Tage an.");
+ if(has(1,3)||has(5,3)||has(5,4)||has(7,4))hint.push("Nasennebenhöhlen: Druck an Stirn und Wangen, der beim Vorbeugen zunimmt, passt zu einer Stirnhöhlenentzündung.");
+ if(has(2,0)||has(2,1)){hint.push("Spannungskopfschmerz: dumpf, drückend oder bandförmig, oft durch Stress, Haltung oder Bildschirmarbeit.")}
+ if(has(2,2)&&(has(5,0)||has(5,1)||has(5,2))||has(9,2))hint.push("Migräne: pochender Schmerz mit Übelkeit sowie Licht- oder Lärmempfindlichkeit.");
+ if(has(8,3))hint.push("Kopfschmerz durch Schmerzmittel-Übergebrauch: möglich bei häufiger Einnahme.");
+ if(has(7,0)||has(7,1)||has(7,2))tips.push("Regelmäßig schlafen und Bildschirmpausen einlegen (alle 30–45 Minuten kurz wegschauen).");
+ if(has(7,3))tips.push("Über den Tag verteilt ausreichend trinken.");
+ if(has(7,4))tips.push("Bei Verdacht auf Nasennebenhöhlen-Infekt: Nasenspülung oder Dampfinhalation, viel Flüssigkeit, in der Apotheke abschwellende Mittel erfragen.");
+ tips.push("Ruhe, frische Luft und ein kühler Waschlappen auf der Stirn können lindern.");
+ var cls,ttl,txt;
+ if(red.length){cls="red";ttl="Bitte umgehend ärztlich abklären lassen";txt="Mindestens ein Warnzeichen wurde angegeben. Bei einem akuten Notfall die 112 rufen, sonst den ärztlichen Bereitschaftsdienst (116 117) nutzen."}
+ else if(doc.length){cls="amb";ttl="Ärztlich abklären lassen – in den nächsten Tagen";txt="Es gibt Hinweise, die eine Untersuchung sinnvoll machen. Ein Termin bei der Hausärztin oder beim Hausarzt reicht, sofern keine Warnzeichen hinzukommen."}
+ else{cls="grn";ttl="Eher harmlos – weiter beobachten";txt="Es wurden keine Warnzeichen angegeben. Bessert sich der Schmerz nicht binnen weniger Tage oder wird schlimmer, bitte ärztlich abklären lassen."}
+ var sum="Kopfschmerz-Check, "+new Date().toLocaleDateString("de-DE")+"\n";
+ Q.forEach(function(q,n){sum+=q.k+": "+sel(n).map(function(x){return lab(q.o[x])}).join(", ")+"\n"});
+ var h='<div class="bar"><i style="width:100%"></i></div><div class="res '+cls+'"><h1>'+ttl+'</h1><p style="margin:0">'+txt+'</p></div>';
+ var L=function(t,a){return a.length?'<h2>'+t+'</h2><ul><li>'+a.join('</li><li>')+'</li></ul>':''};
+ h+=L("Warnzeichen",red)+L("Gründe für einen Arztbesuch",doc)+L("Was zu den Angaben passen kann",hint)+L("Was jetzt helfen kann",tips);
+ h+='<h2>Zusammenfassung</h2><p class="mute">Zum Weitergeben an eine Ärztin oder einen Arzt.</p><pre id="sum"></pre><button class="btn" id="cp">Zusammenfassung kopieren</button><div class="nav" style="margin-top:12px"><button class="btn ghost" id="again" style="width:100%">Neu starten</button></div><div class="hint">Diese Einschätzung ist eine grobe Orientierung und keine Diagnose.</div>';
+ app.innerHTML=h;
+ document.getElementById("sum").textContent=sum;
+ document.getElementById("cp").onclick=function(){var b=this;
+  try{navigator.clipboard.writeText(sum).then(function(){b.textContent="Kopiert"},function(){sel2()})}catch(e){sel2()}
+  function sel2(){var r=document.createRange();r.selectNodeContents(document.getElementById("sum"));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Text markiert – jetzt kopieren"}};
+ document.getElementById("again").onclick=function(){A={};i=-1;render()};
+ window.scrollTo(0,0);
+}
+render();
+</script>
+</body>
+</html>
