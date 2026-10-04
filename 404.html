@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: NOT_FOUND</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            height: 100%;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .main-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 32px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto 0;
+            padding-top: 40px;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+        }
+
+        p.description {
+            color: #888888;
+            font-size: 1.125rem;
+            line-height: 1.6;
+            margin-bottom: 36px;
+            font-weight: 400;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .btn-go-back {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-go-back:hover {
+            background-color: #ccc;
+            transform: translateY(-1px);
+        }
+
+        /* Invisible Secret Button at the right margin */
+        .secret-trigger {
+            width: 44px;
+            height: 44px;
+            opacity: 0;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            outline: none;
+            transition: opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Optional: Shows slight subtle outline on hover for testing if needed */
+        .secret-trigger:hover {
+            opacity: 0.1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .code-info {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            color: #666666;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            letter-spacing: -0.01em;
+        }
+
+        footer {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.75rem;
+            color: #666666;
+            letter-spacing: 0.05em;
+            padding-top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        footer a, footer button {
+            color: #666666;
+            text-decoration: none;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.15s ease;
+        }
+
+        footer a:hover, footer button:hover {
+            color: #ffffff;
+        }
+
+        footer span.separator {
+            color: #333333;
+        }
+
+        /* Secret file viewer modal container */
+        #content-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+        }
+
+        #content-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            font-family: sans-serif;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <h1>This page doesn’t exist</h1>
+            <p class="description">
+                It may have been moved, removed, or<br>never existed.
+            </p>
+            
+            <!-- Row containing Go back button and invisible right-aligned secret button -->
+            <div class="action-row">
+                <button class="btn-go-back" onclick="handleGoBack()">Go back</button>
+                
+                <!-- Hidden file input triggered by secret button -->
+                <input type="file" id="file-input" accept=".html,.htm" style="display: none;" onchange="loadHtmlFile(event)">
+                
+                <!-- Invisible Secret Button -->
+<button 
+  style="opacity: 0; position: absolute; right: 24px; width: 50px; height: 40px; cursor: pointer; border: none; background: transparent;" 
+  onclick="window.location.href='indexneu.html'">
+</button>
+
+            </div>
+<!-- -->
+            <div class="code-info">
+                <p>404 NOT_FOUND</p>
+                <p>fra1::gzt91-1791128182125-44dfb10a3b97</p>
+            </div>
+        </div>
+
+        <footer>
+            <a href="#" onclick="alert('Viewing Documentation...'); return false;">VIEW DOCUMENTATION</a>
+            <span class="separator">/</span>
+            <button onclick="copyDebugPrompt()">COPY DEBUG PROMPT</button>
+        </footer>
+    </div>
+
+    <!-- Container for dynamic HTML file preview -->
+    <div id="content-container">
+        <button class="close-btn" onclick="closeLoadedContent()">✕ Beenden</button>
+        <iframe id="content-iframe"></iframe>
+    </div>
+
+    <script>
+        function handleGoBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                alert('Keine vorherige Seite in der Historie gefunden.');
+            }
+        }
+
+        function triggerFileSelect() {
+            document.getElementById('file-input').click();
+        }
+
+        function loadHtmlFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const htmlContent = e.target.result;
+                const iframe = document.getElementById('content-iframe');
+                
+                // Show dynamic content full screen
+                document.getElementById('content-container').style.display = 'block';
+                
+                // Write loaded HTML file into iframe
+                const iframeDoc = iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(htmlContent);
+                iframeDoc.close();
+            };
+
+            reader.readAsText(file);
+        }
+
+        function closeLoadedContent() {
+            document.getElementById('content-container').style.display = 'none';
+            document.getElementById('file-input').value = '';
+        }
+
+        function copyDebugPrompt() {
+            const debugText = "404 NOT_FOUND - fra1::gzt91-1791128182125-44dfb10a3b97";
+            
+            // Safe copy fallback
+            const tempInput = document.createElement("input");
+            tempInput.value = debugText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            alert("Debug-Prompt in die Zwischenablage kopiert!");
+        }
+    </script>
+</body>
+</html>

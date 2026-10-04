@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: NOT_FOUND</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto 0;
+            padding-left: 12px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        p.description {
+            color: #a1a1a1;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        .btn-go-back {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 40px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-go-back:hover {
+            background-color: #ccc;
+        }
+
+        .code-info {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            color: #666666;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        footer {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.8rem;
+            color: #888888;
+            letter-spacing: 0.05em;
+            padding-bottom: 12px;
+            padding-left: 12px;
+        }
+
+        footer a {
+            color: #888888;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #ffffff;
+        }
+
+        footer span.separator {
+            margin: 0 8px;
+            color: #444444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>This page doesn’t exist</h1>
+        <p class="description">
+            It may have been moved, removed, or<br>never existed.
+        </p>
+        
+        <button class="btn-go-back" onclick="history.back()">Go back</button>
+
+        <div class="code-info">
+            <p>404 NOT_FOUND</p>
+            <p>fra1::gzt91-1791128182125-44dfb10a3b97</p>
+        </div>
+    </div>
+
+    <footer>
+        <a href="#">VIEW DOCUMENTATION</a>
+        <span class="separator">/</span>
+        <a href="#">COPY DEBUG PROMPT</a>
+    </footer>
+
+</body>
+</html>
